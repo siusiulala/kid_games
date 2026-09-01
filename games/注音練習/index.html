@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>注音符號練習</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=ZCOOL+KuaiLe&display=swap');
+
+  :root{
+    --sky-top:#B7F0D2;
+    --sky-bottom:#E4FBEF;
+    --sun:#FFD93D;
+    --coral:#FF6F59;
+    --grass:#4FBE8E;
+    --purple:#7C5FC4;
+    --white:#FFFFFF;
+    --ink:#213A34;
+    --card-shadow: 0 8px 0 rgba(33,58,52,0.16);
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family:'ZCOOL KuaiLe', sans-serif;
+    color:var(--ink);
+    overflow-x:hidden;
+    user-select:none;
+  }
+
+  body{
+    background:linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%, #FFF9E4 100%);
+    min-height:100vh;
+    position:relative;
+  }
+
+  .deco{ position:fixed; pointer-events:none; z-index:0; opacity:0.9; }
+  .sun{ top:18px; right:22px; width:70px; height:70px; border-radius:50%;
+    background:var(--sun); box-shadow:0 0 0 10px rgba(255,217,61,0.35); }
+  .cloud{ background:#fff; border-radius:50px; opacity:0.85; }
+  .cloud1{ top:60px; left:-20px; width:140px; height:44px; }
+  .cloud1::before, .cloud1::after{ content:''; position:absolute; background:#fff; border-radius:50%; }
+  .cloud1::before{ width:60px; height:60px; top:-28px; left:14px; }
+  .cloud1::after{ width:44px; height:44px; top:-20px; left:70px; }
+  .cloud2{ top:150px; right:-30px; width:110px; height:36px; }
+  .cloud2::before{ content:''; position:absolute; width:46px; height:46px; background:#fff; border-radius:50%; top:-20px; left:20px; }
+
+  .wrap{ position:relative; z-index:1; max-width:780px; margin:0 auto; padding:18px 16px 40px; }
+
+  header{ display:flex; align-items:flex-end; gap:14px; margin-bottom:14px; }
+  .mascot{ font-size:58px; line-height:1; flex-shrink:0; animation: bob 2.6s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0) rotate(-4deg);} 50%{ transform:translateY(-8px) rotate(4deg);} }
+  .speech-bubble{
+    background:var(--white); border-radius:20px; padding:10px 16px;
+    box-shadow:var(--card-shadow); font-size:16px; position:relative; flex:1;
+  }
+  .speech-bubble::after{
+    content:''; position:absolute; left:-10px; bottom:14px;
+    border-width:8px 12px 8px 0; border-style:solid;
+    border-color:transparent var(--white) transparent transparent;
+  }
+
+  h1{
+    font-size:30px; text-align:center; margin:6px 0 4px;
+    text-shadow: 2px 2px 0 var(--sun); letter-spacing:1px;
+  }
+  a.back-link{
+    display:block; text-align:center; font-size:14px; color:#3f6b5c;
+    margin-bottom:14px; text-decoration:none;
+  }
+  a.back-link:hover{ text-decoration:underline; }
+
+  .toggle{
+    display:flex; gap:8px; background:rgba(255,255,255,0.6);
+    padding:6px; border-radius:999px; margin:0 auto 22px; width:fit-content;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.06); flex-wrap:wrap; justify-content:center;
+  }
+  .toggle button{
+    font-family:'ZCOOL KuaiLe', sans-serif; font-size:16px;
+    border:none; padding:10px 18px; border-radius:999px; cursor:pointer;
+    background:transparent; color:var(--ink); transition:all .2s ease;
+  }
+  .toggle button.active{
+    background:var(--coral); color:#fff; box-shadow:0 4px 0 rgba(0,0,0,0.12);
+    transform:translateY(-1px);
+  }
+
+  section{ display:none; }
+  section.active{ display:block; animation:fadeIn .3s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Learn mode ---------- */
+  .group-label{
+    font-size:16px; color:#3f6b5c; margin:14px 0 8px 4px;
+  }
+  .zy-grid{
+    display:grid; grid-template-columns:repeat(7, 1fr); gap:10px;
+    margin-bottom:10px;
+  }
+  @media (max-width:520px){ .zy-grid{ grid-template-columns:repeat(5, 1fr);} }
+
+  .zy-card{
+    font-family:'Baloo 2', sans-serif; font-weight:800;
+    font-size:26px; text-align:center; padding:14px 0 8px;
+    background:var(--white); border:none; border-radius:16px;
+    box-shadow:var(--card-shadow); cursor:pointer; color:var(--purple);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .zy-card:active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(33,58,52,0.16); }
+  .zy-card.selected{ background:var(--sun); color:var(--ink); }
+
+  .detail-panel{
+    background:var(--white); border-radius:22px; padding:20px;
+    box-shadow:var(--card-shadow); text-align:center; min-height:150px; margin-top:16px;
+  }
+  .detail-panel .big-zy{
+    font-family:'Baloo 2', sans-serif; font-weight:800; font-size:64px;
+    color:var(--coral); line-height:1;
+  }
+  .detail-panel .word-line{ font-size:24px; margin:8px 0 6px; }
+  .detail-panel .emoji-line{ font-size:44px; margin-bottom:8px; }
+  .hint{ color:#6d8c81; font-size:15px; margin-top:8px; }
+
+  /* ---------- shared quiz styles ---------- */
+  .quiz-card{
+    background:var(--white); border-radius:22px; padding:22px 18px;
+    box-shadow:var(--card-shadow); text-align:center;
+  }
+  .quiz-question{ font-size:20px; margin-bottom:6px; }
+  .quiz-sub{ font-size:14px; color:#6d8c81; margin-bottom:16px; }
+  .stage-emoji{ font-size:70px; margin-bottom:18px; }
+  .stage-emoji span{ display:inline-block; animation:pop .35s ease; }
+  @keyframes pop{ from{ transform:scale(0);} to{ transform:scale(1);} }
+
+  .choice-row{ display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:6px; }
+  .choice-btn{
+    font-family:'Baloo 2', sans-serif; font-weight:800; font-size:34px;
+    width:80px; height:80px; border-radius:18px; border:none;
+    background:var(--sun); color:var(--ink); box-shadow:var(--card-shadow);
+    cursor:pointer; transition:transform .12s ease;
+  }
+  .choice-btn:active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(33,58,52,0.16); }
+  .choice-btn.correct{ background:var(--grass); color:#fff; }
+  .choice-btn.wrong{ background:#f28b82; color:#fff; }
+
+  .feedback{ min-height:30px; font-size:18px; margin-top:14px; }
+  .feedback.good{ color:#1e7a54; }
+  .feedback.bad{ color:#c1440e; }
+
+  .next-btn{
+    margin-top:14px; font-family:'ZCOOL KuaiLe', sans-serif; font-size:17px;
+    background:var(--purple); color:#fff; border:none; padding:10px 22px;
+    border-radius:999px; cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,0.15);
+    display:none;
+  }
+
+  .sound-btn{
+    background:var(--purple); color:#fff; border:none; border-radius:999px;
+    padding:8px 16px; font-family:'ZCOOL KuaiLe', sans-serif; font-size:14px;
+    cursor:pointer; margin-top:8px;
+  }
+
+  .stars-bar{
+    position:sticky; bottom:0; margin-top:24px; text-align:center;
+    background:rgba(255,255,255,0.75); backdrop-filter:blur(4px);
+    border-radius:16px; padding:10px; font-size:18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="deco sun"></div>
+<div class="deco cloud cloud1"></div>
+<div class="deco cloud cloud2"></div>
+
+<div class="wrap">
+  <header>
+    <div class="mascot">🦊</div>
+    <div class="speech-bubble" id="mascotText">哈囉！我是狐狐老師，我們一起來認識注音符號吧！</div>
+  </header>
+
+  <h1>注音符號練習</h1>
+  <a class="back-link" href="../../index.html">← 回到遊戲總覽</a>
+
+  <div class="toggle">
+    <button id="tabLearn" class="active">認識注音</button>
+    <button id="tabListen">聽一聽選一選</button>
+    <button id="tabPic">看圖找注音</button>
+  </div>
+
+  <!-- 認識注音 -->
+  <section id="learnSection" class="active">
+    <div class="group-label">聲符（21 個）</div>
+    <div class="zy-grid" id="initialGrid"></div>
+    <div class="group-label">韻符（16 個）</div>
+    <div class="zy-grid" id="finalGrid"></div>
+    <div class="detail-panel" id="detailPanel">
+      <div class="hint">點一點上面的注音符號，聽聽看怎麼唸！</div>
+    </div>
+  </section>
+
+  <!-- 聽一聽選一選 -->
+  <section id="listenSection">
+    <div class="quiz-card">
+      <div class="quiz-question">仔細聽，找出正確的注音符號！</div>
+      <div class="quiz-sub" id="listenSub">狐狐老師唸出一個注音，你來找找看</div>
+      <button class="sound-btn" id="replayListenBtn">🔊 再聽一次</button>
+      <div class="choice-row" id="listenChoiceRow" style="margin-top:20px;"></div>
+      <div class="feedback" id="listenFeedback"></div>
+      <button class="next-btn" id="listenNextBtn">下一題 →</button>
+    </div>
+  </section>
+
+  <!-- 看圖找注音 -->
+  <section id="picSection">
+    <div class="quiz-card">
+      <div class="quiz-question">這是什麼呢？它開頭的注音是？</div>
+      <div class="quiz-sub" id="picSub"></div>
+      <div class="stage-emoji" id="picEmoji"></div>
+      <div class="choice-row" id="picChoiceRow"></div>
+      <div class="feedback" id="picFeedback"></div>
+      <button class="next-btn" id="picNextBtn">下一題 →</button>
+    </div>
+  </section>
+
+  <div class="stars-bar">⭐ 答對次數：<span id="starCount">0</span> ⭐</div>
+</div>
+
+<script>
+  /* symbol: { zy, word, emoji } */
+  const INITIALS = [
+    { zy:'ㄅ', word:'爸爸', emoji:'👨' },
+    { zy:'ㄆ', word:'婆婆', emoji:'👵' },
+    { zy:'ㄇ', word:'媽媽', emoji:'👩' },
+    { zy:'ㄈ', word:'飛機', emoji:'✈️' },
+    { zy:'ㄉ', word:'弟弟', emoji:'👦' },
+    { zy:'ㄊ', word:'兔子', emoji:'🐰' },
+    { zy:'ㄋ', word:'小鳥', emoji:'🐦' },
+    { zy:'ㄌ', word:'老鼠', emoji:'🐭' },
+    { zy:'ㄍ', word:'狗狗', emoji:'🐶' },
+    { zy:'ㄎ', word:'可樂', emoji:'🥤' },
+    { zy:'ㄏ', word:'河馬', emoji:'🦛' },
+    { zy:'ㄐ', word:'雞蛋', emoji:'🥚' },
+    { zy:'ㄑ', word:'汽車', emoji:'🚗' },
+    { zy:'ㄒ', word:'西瓜', emoji:'🍉' },
+    { zy:'ㄓ', word:'豬豬', emoji:'🐷' },
+    { zy:'ㄔ', word:'吃飯', emoji:'🍚' },
+    { zy:'ㄕ', word:'獅子', emoji:'🦁' },
+    { zy:'ㄖ', word:'熱狗', emoji:'🌭' },
+    { zy:'ㄗ', word:'走路', emoji:'🚶' },
+    { zy:'ㄘ', word:'草莓', emoji:'🍓' },
+    { zy:'ㄙ', word:'雨傘', emoji:'☂️' },
+  ];
+
+  const FINALS = [
+    { zy:'ㄧ', word:'衣服', emoji:'👕' },
+    { zy:'ㄨ', word:'烏龜', emoji:'🐢' },
+    { zy:'ㄩ', word:'小魚', emoji:'🐟' },
+    { zy:'ㄚ', word:'阿公', emoji:'👴' },
+    { zy:'ㄛ', word:'喔！', emoji:'😮' },
+    { zy:'ㄜ', word:'鵝', emoji:'🦢' },
+    { zy:'ㄝ', word:'耶！', emoji:'✌️' },
+    { zy:'ㄞ', word:'愛心', emoji:'❤️' },
+    { zy:'ㄟ', word:'誒，你好', emoji:'👋' },
+    { zy:'ㄠ', word:'熬夜的貓頭鷹', emoji:'🦉' },
+    { zy:'ㄡ', word:'布袋戲偶', emoji:'🎎' },
+    { zy:'ㄢ', word:'安全帽', emoji:'⛑️' },
+    { zy:'ㄣ', word:'感恩', emoji:'🙏' },
+    { zy:'ㄤ', word:'昂首的長頸鹿', emoji:'🦒' },
+    { zy:'ㄥ', word:'嗯，我在想', emoji:'🤔' },
+    { zy:'ㄦ', word:'耳朵', emoji:'👂' },
+  ];
+
+  const ALL_SYMBOLS = INITIALS.concat(FINALS);
+
+  let starCount = 0;
+  let voices = [];
+
+  function loadVoices(){ voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; }
+  if('speechSynthesis' in window){
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function speak(text, opts){
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-TW';
+    let v = voices.find(v => v.lang === 'zh-TW') || voices.find(v => v.lang && v.lang.startsWith('zh'));
+    if(v) u.voice = v;
+    u.rate = (opts && opts.rate) || 0.85;
+    u.pitch = (opts && opts.pitch) || 1.15;
+    window.speechSynthesis.speak(u);
+  }
+
+  function setMascot(text, say){
+    document.getElementById('mascotText').textContent = text;
+    if(say) speak(text, {rate:0.9});
+  }
+
+  const starCountEl = document.getElementById('starCount');
+
+  /* ---------- tabs ---------- */
+  const tabLearn = document.getElementById('tabLearn');
+  const tabListen = document.getElementById('tabListen');
+  const tabPic = document.getElementById('tabPic');
+  const learnSection = document.getElementById('learnSection');
+  const listenSection = document.getElementById('listenSection');
+  const picSection = document.getElementById('picSection');
+
+  const tabs = [
+    { btn: tabLearn, section: learnSection },
+    { btn: tabListen, section: listenSection },
+    { btn: tabPic, section: picSection }
+  ];
+
+  function activateTab(target){
+    tabs.forEach(t => {
+      const isActive = t.btn === target.btn;
+      t.btn.classList.toggle('active', isActive);
+      t.section.classList.toggle('active', isActive);
+    });
+  }
+
+  tabLearn.addEventListener('click', () => {
+    activateTab(tabs[0]);
+    setMascot('點一點注音符號，聽聽看怎麼唸！', true);
+  });
+  tabListen.addEventListener('click', () => {
+    activateTab(tabs[1]);
+    setMascot('仔細聽，找出正確的注音符號吧！', true);
+    if(!listenSection.dataset.started){ newListenQuestion(); listenSection.dataset.started = '1'; }
+  });
+  tabPic.addEventListener('click', () => {
+    activateTab(tabs[2]);
+    setMascot('看看圖片，找出開頭的注音吧！', true);
+    if(!picSection.dataset.started){ newPicQuestion(); picSection.dataset.started = '1'; }
+  });
+
+  /* ---------- Learn mode ---------- */
+  const initialGrid = document.getElementById('initialGrid');
+  const finalGrid = document.getElementById('finalGrid');
+  const detailPanel = document.getElementById('detailPanel');
+
+  function buildGrid(container, list){
+    list.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'zy-card';
+      btn.textContent = item.zy;
+      btn.addEventListener('click', () => showSymbol(item, btn));
+      container.appendChild(btn);
+    });
+  }
+  buildGrid(initialGrid, INITIALS);
+  buildGrid(finalGrid, FINALS);
+
+  function showSymbol(item, btn){
+    document.querySelectorAll('.zy-card').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    detailPanel.innerHTML = `
+      <div class="big-zy">${item.zy}</div>
+      <div class="word-line">像是「${item.word}」的開頭</div>
+      <div class="emoji-line">${item.emoji}</div>
+      <button class="sound-btn" id="replayBtn">🔊 再唸一次</button>
+    `;
+    document.getElementById('replayBtn').addEventListener('click', () => speak(item.zy));
+    speak(`${item.zy}，像是${item.word}的開頭`);
+    setMascot(`這是 ${item.zy}，像「${item.word}」的開頭！`, false);
+  }
+
+  /* ---------- Listen & choose mode ---------- */
+  const listenSub = document.getElementById('listenSub');
+  const listenChoiceRow = document.getElementById('listenChoiceRow');
+  const listenFeedback = document.getElementById('listenFeedback');
+  const listenNextBtn = document.getElementById('listenNextBtn');
+  const replayListenBtn = document.getElementById('replayListenBtn');
+
+  let listenAnswer = null;
+  let listenAnswered = false;
+
+  function pickRandom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function newListenQuestion(){
+    listenAnswered = false;
+    listenFeedback.textContent = '';
+    listenFeedback.className = 'feedback';
+    listenNextBtn.style.display = 'none';
+    listenSub.textContent = '狐狐老師唸出一個注音，你來找找看';
+
+    listenAnswer = pickRandom(ALL_SYMBOLS);
+
+    const choiceSet = new Set([listenAnswer.zy]);
+    while(choiceSet.size < 3){
+      choiceSet.add(pickRandom(ALL_SYMBOLS).zy);
+    }
+    const arr = Array.from(choiceSet).sort(() => Math.random() - 0.5);
+
+    listenChoiceRow.innerHTML = '';
+    arr.forEach(zy => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = zy;
+      btn.addEventListener('click', () => checkListenAnswer(zy, btn));
+      listenChoiceRow.appendChild(btn);
+    });
+
+    askListenQuestion();
+  }
+
+  function askListenQuestion(){
+    speak(`找找看，${listenAnswer.zy}`, {rate:0.8});
+  }
+
+  function checkListenAnswer(zy, btn){
+    if(listenAnswered) return;
+    listenAnswered = true;
+    const buttons = listenChoiceRow.querySelectorAll('.choice-btn');
+
+    if(zy === listenAnswer.zy){
+      btn.classList.add('correct');
+      listenFeedback.textContent = '答對了！你好棒！🎉';
+      listenFeedback.className = 'feedback good';
+      starCount++;
+      starCountEl.textContent = starCount;
+      speak(`答對了！是 ${listenAnswer.zy}！你好棒！`);
+      setMascot('答對了！你好棒！', false);
+    } else {
+      btn.classList.add('wrong');
+      buttons.forEach(b => { if(b.textContent === listenAnswer.zy) b.classList.add('correct'); });
+      listenFeedback.textContent = `再試試看！正確答案是 ${listenAnswer.zy} 喔！`;
+      listenFeedback.className = 'feedback bad';
+      speak(`再試試看，正確答案是 ${listenAnswer.zy}`);
+      setMascot('沒關係，再試一次！', false);
+    }
+    buttons.forEach(b => b.disabled = true);
+    listenNextBtn.style.display = 'inline-block';
+  }
+
+  replayListenBtn.addEventListener('click', askListenQuestion);
+  listenNextBtn.addEventListener('click', newListenQuestion);
+
+  /* ---------- Picture match mode (initials only) ---------- */
+  const picSub = document.getElementById('picSub');
+  const picEmoji = document.getElementById('picEmoji');
+  const picChoiceRow = document.getElementById('picChoiceRow');
+  const picFeedback = document.getElementById('picFeedback');
+  const picNextBtn = document.getElementById('picNextBtn');
+
+  let picAnswer = null;
+  let picAnswered = false;
+
+  function newPicQuestion(){
+    picAnswered = false;
+    picFeedback.textContent = '';
+    picFeedback.className = 'feedback';
+    picNextBtn.style.display = 'none';
+
+    picAnswer = pickRandom(INITIALS);
+    picSub.textContent = `「${picAnswer.word}」`;
+    picEmoji.innerHTML = `<span>${picAnswer.emoji}</span>`;
+
+    const choiceSet = new Set([picAnswer.zy]);
+    while(choiceSet.size < 3){
+      choiceSet.add(pickRandom(INITIALS).zy);
+    }
+    const arr = Array.from(choiceSet).sort(() => Math.random() - 0.5);
+
+    picChoiceRow.innerHTML = '';
+    arr.forEach(zy => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = zy;
+      btn.addEventListener('click', () => checkPicAnswer(zy, btn));
+      picChoiceRow.appendChild(btn);
+    });
+
+    speak(`這是什麼呢？它開頭的注音是？${picAnswer.word}`, {rate:0.85});
+  }
+
+  function checkPicAnswer(zy, btn){
+    if(picAnswered) return;
+    picAnswered = true;
+    const buttons = picChoiceRow.querySelectorAll('.choice-btn');
+
+    if(zy === picAnswer.zy){
+      btn.classList.add('correct');
+      picFeedback.textContent = '答對了！你好棒！🎉';
+      picFeedback.className = 'feedback good';
+      starCount++;
+      starCountEl.textContent = starCount;
+      speak(`答對了！${picAnswer.word}是${picAnswer.zy}開頭！你好棒！`);
+      setMascot('答對了！你好棒！', false);
+    } else {
+      btn.classList.add('wrong');
+      buttons.forEach(b => { if(b.textContent === picAnswer.zy) b.classList.add('correct'); });
+      picFeedback.textContent = `再試試看！${picAnswer.word}是 ${picAnswer.zy} 開頭喔！`;
+      picFeedback.className = 'feedback bad';
+      speak(`再試試看，${picAnswer.word}是${picAnswer.zy}開頭`);
+      setMascot('沒關係，再試一次！', false);
+    }
+    buttons.forEach(b => b.disabled = true);
+    picNextBtn.style.display = 'inline-block';
+  }
+
+  picNextBtn.addEventListener('click', newPicQuestion);
+
+  /* initial greeting (speech needs user gesture on some browsers) */
+  document.body.addEventListener('click', function initSpeech(){
+    speak('哈囉！我是狐狐老師，我們一起來認識注音符號吧！');
+    document.body.removeEventListener('click', initSpeech);
+  }, { once:true });
+</script>
+
+</body>
+</html>
