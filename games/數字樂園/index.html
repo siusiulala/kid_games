@@ -125,6 +125,20 @@
   .icon-row{ font-size:30px; line-height:1.4; word-spacing:4px; min-height:40px; }
   .hint{ color:#9a90b8; font-size:15px; margin-top:8px; }
 
+  /* ---------- Listen & choose mode ---------- */
+  .listen-question{ font-size:22px; margin-bottom:6px; }
+  .listen-sub{ font-size:14px; color:#9a90b8; margin-bottom:16px; }
+  .big-choice-row{ display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:6px; }
+  .big-choice-btn{
+    font-family:'Baloo 2', sans-serif; font-weight:800; font-size:42px;
+    width:92px; height:92px; border-radius:20px; border:none;
+    background:var(--sun); color:var(--ink); box-shadow:var(--card-shadow);
+    cursor:pointer; transition:transform .12s ease;
+  }
+  .big-choice-btn:active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(43,34,80,0.18); }
+  .big-choice-btn.correct{ background:var(--grass); color:#fff; }
+  .big-choice-btn.wrong{ background:#f28b82; color:#fff; }
+
   /* ---------- Count mode ---------- */
   .quiz-card{
     background:var(--white); border-radius:22px; padding:22px 18px;
@@ -191,6 +205,7 @@
 
   <div class="toggle">
     <button id="tabLearn" class="active">認識數字</button>
+    <button id="tabListen">聽一聽選一選</button>
     <button id="tabCount">數一數</button>
   </div>
 
@@ -199,6 +214,18 @@
     <div class="num-grid" id="numGrid"></div>
     <div class="detail-panel" id="detailPanel">
       <div class="hint">點一點上面的數字卡片，聽聽看怎麼唸！</div>
+    </div>
+  </section>
+
+  <!-- 聽一聽選一選 -->
+  <section id="listenSection">
+    <div class="quiz-card">
+      <div class="listen-question">仔細聽，找出正確的數字！</div>
+      <div class="listen-sub" id="listenSub">熊熊老師唸出一個數字，你來找找看</div>
+      <button class="sound-btn" id="replayListenBtn">🔊 再聽一次</button>
+      <div class="big-choice-row" id="listenChoiceRow" style="margin-top:20px;"></div>
+      <div class="feedback" id="listenFeedback"></div>
+      <button class="next-btn" id="listenNextBtn">下一題 →</button>
     </div>
   </section>
 
@@ -248,18 +275,37 @@
 
   /* ---------- tabs ---------- */
   const tabLearn = document.getElementById('tabLearn');
+  const tabListen = document.getElementById('tabListen');
   const tabCount = document.getElementById('tabCount');
   const learnSection = document.getElementById('learnSection');
+  const listenSection = document.getElementById('listenSection');
   const countSection = document.getElementById('countSection');
 
+  const tabs = [
+    { btn: tabLearn, section: learnSection },
+    { btn: tabListen, section: listenSection },
+    { btn: tabCount, section: countSection }
+  ];
+
+  function activateTab(target){
+    tabs.forEach(t => {
+      const isActive = t.btn === target.btn;
+      t.btn.classList.toggle('active', isActive);
+      t.section.classList.toggle('active', isActive);
+    });
+  }
+
   tabLearn.addEventListener('click', () => {
-    tabLearn.classList.add('active'); tabCount.classList.remove('active');
-    learnSection.classList.add('active'); countSection.classList.remove('active');
+    activateTab(tabs[0]);
     setMascot('點一點數字卡片，聽聽看怎麼唸！', true);
   });
+  tabListen.addEventListener('click', () => {
+    activateTab(tabs[1]);
+    setMascot('仔細聽，找出正確的數字吧！', true);
+    if(!listenSection.dataset.started){ newListenQuestion(); listenSection.dataset.started = '1'; }
+  });
   tabCount.addEventListener('click', () => {
-    tabCount.classList.add('active'); tabLearn.classList.remove('active');
-    countSection.classList.add('active'); learnSection.classList.remove('active');
+    activateTab(tabs[2]);
     setMascot('數一數，選出正確的數字吧！', true);
     if(!countSection.dataset.started){ newQuestion(); countSection.dataset.started = '1'; }
   });
@@ -299,6 +345,76 @@
     speak(`${word}`);
     setMascot(`這是 ${n}，唸作「${word}」！`, false);
   }
+
+  /* ---------- Listen & choose mode ---------- */
+  const listenSub = document.getElementById('listenSub');
+  const listenChoiceRow = document.getElementById('listenChoiceRow');
+  const listenFeedback = document.getElementById('listenFeedback');
+  const listenNextBtn = document.getElementById('listenNextBtn');
+  const replayListenBtn = document.getElementById('replayListenBtn');
+
+  let listenAnswer = 0;
+  let listenAnswered = false;
+
+  function newListenQuestion(){
+    listenAnswered = false;
+    listenFeedback.textContent = '';
+    listenFeedback.className = 'feedback';
+    listenNextBtn.style.display = 'none';
+
+    listenAnswer = Math.floor(Math.random() * 11); // 0-10
+    listenSub.textContent = '熊熊老師唸出一個數字，你來找找看';
+
+    const choices = new Set([listenAnswer]);
+    while(choices.size < 3){
+      const d = Math.floor(Math.random() * 11);
+      choices.add(d);
+    }
+    const arr = Array.from(choices).sort(() => Math.random() - 0.5);
+
+    listenChoiceRow.innerHTML = '';
+    arr.forEach(n => {
+      const btn = document.createElement('button');
+      btn.className = 'big-choice-btn';
+      btn.textContent = n;
+      btn.addEventListener('click', () => checkListenAnswer(n, btn));
+      listenChoiceRow.appendChild(btn);
+    });
+
+    askListenQuestion();
+  }
+
+  function askListenQuestion(){
+    speak(`請找出數字 ${NUM_WORDS[listenAnswer]}`, {rate:0.85});
+  }
+
+  function checkListenAnswer(n, btn){
+    if(listenAnswered) return;
+    listenAnswered = true;
+    const buttons = listenChoiceRow.querySelectorAll('.big-choice-btn');
+
+    if(n === listenAnswer){
+      btn.classList.add('correct');
+      listenFeedback.textContent = '答對了！你好棒！🎉';
+      listenFeedback.className = 'feedback good';
+      starCount++;
+      starCountEl.textContent = starCount;
+      speak(`答對了！是 ${NUM_WORDS[listenAnswer]}！你好棒！`);
+      setMascot('答對了！你好棒！', false);
+    } else {
+      btn.classList.add('wrong');
+      buttons.forEach(b => { if(parseInt(b.textContent) === listenAnswer) b.classList.add('correct'); });
+      listenFeedback.textContent = `再試試看！正確答案是 ${listenAnswer} 喔！`;
+      listenFeedback.className = 'feedback bad';
+      speak(`再試試看，正確答案是 ${NUM_WORDS[listenAnswer]}`);
+      setMascot('沒關係，再試一次！', false);
+    }
+    buttons.forEach(b => b.disabled = true);
+    listenNextBtn.style.display = 'inline-block';
+  }
+
+  replayListenBtn.addEventListener('click', askListenQuestion);
+  listenNextBtn.addEventListener('click', newListenQuestion);
 
   /* ---------- Count mode ---------- */
   const objectStage = document.getElementById('objectStage');
