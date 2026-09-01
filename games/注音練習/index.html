@@ -362,13 +362,13 @@
 
     detailPanel.innerHTML = `
       <div class="big-zy">${item.zy}</div>
-      <div class="word-line">像是「${item.word}」的開頭</div>
+      <div class="word-line">「${item.word}」的${item.zy}</div>
       <div class="emoji-line">${item.emoji}</div>
       <button class="sound-btn" id="replayBtn">🔊 再唸一次</button>
     `;
     document.getElementById('replayBtn').addEventListener('click', () => speak(item.zy));
-    speak(`${item.zy}，像是${item.word}的開頭`);
-    setMascot(`這是 ${item.zy}，像「${item.word}」的開頭！`, false);
+    speak(`${item.zy}，${item.word}的${item.zy}`);
+    setMascot(`這是 ${item.zy}，「${item.word}」的${item.zy}！`, false);
   }
 
   /* ---------- Listen & choose mode ---------- */

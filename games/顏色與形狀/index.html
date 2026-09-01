@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>顏色與形狀樂園</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=ZCOOL+KuaiLe&display=swap');
+
+  :root{
+    --bg-top:#FFF1E6;
+    --bg-bottom:#FFFDF8;
+    --sun:#FFD93D;
+    --accent:#FF6F91;
+    --grass:#4FBE8E;
+    --purple:#6B5B95;
+    --white:#FFFFFF;
+    --ink:#3B2E2A;
+    --shape-color:#6B5B95;
+    --card-shadow: 0 8px 0 rgba(59,46,42,0.14);
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family:'ZCOOL KuaiLe', sans-serif;
+    color:var(--ink);
+    overflow-x:hidden;
+    user-select:none;
+  }
+
+  body{
+    background:linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 55%, #EAF6FF 100%);
+    min-height:100vh;
+    position:relative;
+  }
+
+  .deco{ position:fixed; pointer-events:none; z-index:0; opacity:0.9; }
+  .sun{ top:18px; right:22px; width:70px; height:70px; border-radius:50%;
+    background:var(--sun); box-shadow:0 0 0 10px rgba(255,217,61,0.35); }
+  .cloud{ background:#fff; border-radius:50px; opacity:0.85; }
+  .cloud1{ top:60px; left:-20px; width:140px; height:44px; }
+  .cloud1::before, .cloud1::after{ content:''; position:absolute; background:#fff; border-radius:50%; }
+  .cloud1::before{ width:60px; height:60px; top:-28px; left:14px; }
+  .cloud1::after{ width:44px; height:44px; top:-20px; left:70px; }
+  .cloud2{ top:150px; right:-30px; width:110px; height:36px; }
+  .cloud2::before{ content:''; position:absolute; width:46px; height:46px; background:#fff; border-radius:50%; top:-20px; left:20px; }
+
+  .wrap{ position:relative; z-index:1; max-width:780px; margin:0 auto; padding:18px 16px 40px; }
+
+  header{ display:flex; align-items:flex-end; gap:14px; margin-bottom:14px; }
+  .mascot{ font-size:58px; line-height:1; flex-shrink:0; animation: bob 2.6s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0) rotate(-4deg);} 50%{ transform:translateY(-8px) rotate(4deg);} }
+  .speech-bubble{
+    background:var(--white); border-radius:20px; padding:10px 16px;
+    box-shadow:var(--card-shadow); font-size:16px; position:relative; flex:1;
+  }
+  .speech-bubble::after{
+    content:''; position:absolute; left:-10px; bottom:14px;
+    border-width:8px 12px 8px 0; border-style:solid;
+    border-color:transparent var(--white) transparent transparent;
+  }
+
+  h1{
+    font-size:30px; text-align:center; margin:6px 0 4px;
+    text-shadow: 2px 2px 0 var(--sun); letter-spacing:1px;
+  }
+  a.back-link{
+    display:block; text-align:center; font-size:14px; color:#8a6a52;
+    margin-bottom:14px; text-decoration:none;
+  }
+  a.back-link:hover{ text-decoration:underline; }
+
+  .toggle{
+    display:flex; gap:8px; background:rgba(255,255,255,0.6);
+    padding:6px; border-radius:999px; margin:0 auto 22px; width:fit-content;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.06); flex-wrap:wrap; justify-content:center;
+  }
+  .toggle button{
+    font-family:'ZCOOL KuaiLe', sans-serif; font-size:16px;
+    border:none; padding:10px 18px; border-radius:999px; cursor:pointer;
+    background:transparent; color:var(--ink); transition:all .2s ease;
+  }
+  .toggle button.active{
+    background:var(--accent); color:#fff; box-shadow:0 4px 0 rgba(0,0,0,0.12);
+    transform:translateY(-1px);
+  }
+
+  section{ display:none; }
+  section.active{ display:block; animation:fadeIn .3s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- shared grid/detail ---------- */
+  .item-grid{
+    display:grid; grid-template-columns:repeat(5, 1fr); gap:12px;
+    margin-bottom:16px;
+  }
+  @media (max-width:480px){ .item-grid{ grid-template-columns:repeat(4, 1fr);} }
+
+  .item-card{
+    background:var(--white); border:none; border-radius:16px;
+    box-shadow:var(--card-shadow); cursor:pointer;
+    padding:12px 6px 10px; text-align:center;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .item-card:active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(59,46,42,0.14); }
+  .item-card.selected{ outline:3px solid var(--accent); outline-offset:2px; }
+  .item-card .item-label{ font-size:13px; margin-top:8px; color:var(--ink); }
+
+  .color-swatch{ width:44px; height:44px; border-radius:50%; margin:0 auto; border:2px solid rgba(0,0,0,0.08); }
+  .color-swatch.large{ width:96px; height:96px; }
+
+  .shape-icon{ margin:0 auto; background:var(--shape-color); }
+  .shape-icon.circle{ --cs:44px; width:var(--cs); height:var(--cs); border-radius:50%; }
+  .shape-icon.circle.large{ --cs:96px; }
+  .shape-icon.square{ --qs:42px; width:var(--qs); height:var(--qs); border-radius:10%; }
+  .shape-icon.square.large{ --qs:90px; }
+  .shape-icon.rectangle{ --rw:58px; --rh:36px; width:var(--rw); height:var(--rh); border-radius:10%; }
+  .shape-icon.rectangle.large{ --rw:120px; --rh:74px; }
+  .shape-icon.oval{ --ow:58px; --oh:38px; width:var(--ow); height:var(--oh); border-radius:50%; }
+  .shape-icon.oval.large{ --ow:120px; --oh:78px; }
+  .shape-icon.diamond{ --ds:38px; width:var(--ds); height:var(--ds); border-radius:8%; transform:rotate(45deg); }
+  .shape-icon.diamond.large{ --ds:78px; }
+  .shape-icon.triangle{ --ts:44px; width:0; height:0; background:transparent;
+    border-left:calc(var(--ts) / 2) solid transparent;
+    border-right:calc(var(--ts) / 2) solid transparent;
+    border-bottom:var(--ts) solid var(--shape-color);
+  }
+  .shape-icon.triangle.large{ --ts:88px; }
+  .shape-icon.star{ --ss:46px; width:var(--ss); height:var(--ss);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+  .shape-icon.star.large{ --ss:92px; }
+  .shape-icon.heart{ --hs:46px; width:var(--hs); height:calc(var(--hs) * 0.9); position:relative; background:transparent; }
+  .shape-icon.heart::before, .shape-icon.heart::after{
+    content:''; position:absolute; width:50%; height:80%; top:0;
+    background:var(--shape-color); border-radius:50% 50% 0 0;
+  }
+  .shape-icon.heart::before{ left:50%; transform:rotate(45deg); transform-origin:0 100%; }
+  .shape-icon.heart::after{ left:0; transform:rotate(-45deg); transform-origin:100% 100%; }
+  .shape-icon.heart.large{ --hs:92px; }
+
+  .detail-panel{
+    background:var(--white); border-radius:22px; padding:24px 20px;
+    box-shadow:var(--card-shadow); text-align:center; min-height:170px;
+  }
+  .detail-panel .detail-name{ font-size:26px; margin:14px 0 4px; }
+  .detail-panel .detail-word{ font-size:16px; color:#8a7a6c; margin-bottom:10px; }
+  .hint{ color:#8a7a6c; font-size:15px; }
+
+  /* ---------- quiz ---------- */
+  .quiz-card{
+    background:var(--white); border-radius:22px; padding:22px 18px;
+    box-shadow:var(--card-shadow); text-align:center;
+  }
+  .quiz-question{ font-size:20px; margin-bottom:6px; }
+  .quiz-sub{ font-size:14px; color:#8a7a6c; margin-bottom:18px; }
+
+  .choice-row{ display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:6px; }
+  .choice-btn{
+    width:96px; height:96px; border-radius:18px; border:none;
+    background:#F7F3EE; box-shadow:var(--card-shadow);
+    cursor:pointer; transition:transform .12s ease;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .choice-btn:active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(59,46,42,0.14); }
+  .choice-btn.correct{ background:#DFF5EA; outline:3px solid var(--grass); }
+  .choice-btn.wrong{ background:#FBE4E1; outline:3px solid #E4695D; }
+
+  .feedback{ min-height:30px; font-size:18px; margin-top:14px; }
+  .feedback.good{ color:#1e7a54; }
+  .feedback.bad{ color:#c1440e; }
+
+  .next-btn{
+    margin-top:14px; font-family:'ZCOOL KuaiLe', sans-serif; font-size:17px;
+    background:var(--purple); color:#fff; border:none; padding:10px 22px;
+    border-radius:999px; cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,0.15);
+    display:none;
+  }
+
+  .sound-btn{
+    background:var(--purple); color:#fff; border:none; border-radius:999px;
+    padding:8px 16px; font-family:'ZCOOL KuaiLe', sans-serif; font-size:14px;
+    cursor:pointer; margin-top:10px;
+  }
+
+  .stars-bar{
+    position:sticky; bottom:0; margin-top:24px; text-align:center;
+    background:rgba(255,255,255,0.75); backdrop-filter:blur(4px);
+    border-radius:16px; padding:10px; font-size:18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="deco sun"></div>
+<div class="deco cloud cloud1"></div>
+<div class="deco cloud cloud2"></div>
+
+<div class="wrap">
+  <header>
+    <div class="mascot">🐰</div>
+    <div class="speech-bubble" id="mascotText">哈囉！我是兔兔老師，我們一起來認識顏色和形狀吧！</div>
+  </header>
+
+  <h1>顏色與形狀樂園</h1>
+  <a class="back-link" href="../../index.html">← 回到遊戲總覽</a>
+
+  <div class="toggle">
+    <button id="tabColor" class="active">認識顏色</button>
+    <button id="tabShape">認識形狀</button>
+    <button id="tabQuiz">聽一聽選一選</button>
+  </div>
+
+  <!-- 認識顏色 -->
+  <section id="colorSection" class="active">
+    <div class="item-grid" id="colorGrid"></div>
+    <div class="detail-panel" id="colorDetail">
+      <div class="hint">點一點上面的顏色，聽聽看怎麼唸！</div>
+    </div>
+  </section>
+
+  <!-- 認識形狀 -->
+  <section id="shapeSection">
+    <div class="item-grid" id="shapeGrid"></div>
+    <div class="detail-panel" id="shapeDetail">
+      <div class="hint">點一點上面的形狀，聽聽看怎麼唸！</div>
+    </div>
+  </section>
+
+  <!-- 聽一聽選一選 -->
+  <section id="quizSection">
+    <div class="quiz-card">
+      <div class="quiz-question">仔細聽，找出正確的答案！</div>
+      <div class="quiz-sub" id="quizSub">兔兔老師會說出顏色或形狀，你來找找看</div>
+      <button class="sound-btn" id="replayQuizBtn">🔊 再聽一次</button>
+      <div class="choice-row" id="quizChoiceRow" style="margin-top:20px;"></div>
+      <div class="feedback" id="quizFeedback"></div>
+      <button class="next-btn" id="quizNextBtn">下一題 →</button>
+    </div>
+  </section>
+
+  <div class="stars-bar">⭐ 答對次數：<span id="starCount">0</span> ⭐</div>
+</div>
+
+<script>
+  const COLORS = [
+    { name:'紅色', hex:'#E53935', word:'蘋果', emoji:'🍎' },
+    { name:'橙色', hex:'#FB8C00', word:'橘子', emoji:'🍊' },
+    { name:'黃色', hex:'#FDD835', word:'檸檬', emoji:'🍋' },
+    { name:'綠色', hex:'#43A047', word:'青蘋果', emoji:'🍏' },
+    { name:'藍色', hex:'#1E88E5', word:'藍莓', emoji:'🫐' },
+    { name:'紫色', hex:'#8E24AA', word:'葡萄', emoji:'🍇' },
+    { name:'粉紅色', hex:'#EC407A', word:'櫻花', emoji:'🌸' },
+    { name:'咖啡色', hex:'#6D4C41', word:'巧克力', emoji:'🍫' },
+    { name:'黑色', hex:'#212121', word:'黑色皮球', emoji:'⚫' },
+    { name:'白色', hex:'#FFFFFF', word:'白雲', emoji:'☁️' },
+  ];
+
+  const SHAPES = [
+    { id:'circle', name:'圓形', word:'像太陽、像球一樣圓圓的' },
+    { id:'square', name:'正方形', word:'四邊一樣長，像餅乾盒' },
+    { id:'triangle', name:'三角形', word:'三個角，像飯糰、像山' },
+    { id:'rectangle', name:'長方形', word:'像門、像一本書' },
+    { id:'star', name:'星星', word:'像天空中閃亮的星星' },
+    { id:'heart', name:'愛心', word:'代表愛的形狀' },
+    { id:'oval', name:'橢圓形', word:'像雞蛋、像葉子' },
+    { id:'diamond', name:'菱形', word:'像風箏的形狀' },
+  ];
+
+  let starCount = 0;
+  let voices = [];
+
+  function loadVoices(){ voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; }
+  if('speechSynthesis' in window){
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function speak(text, opts){
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-TW';
+    let v = voices.find(v => v.lang === 'zh-TW') || voices.find(v => v.lang && v.lang.startsWith('zh'));
+    if(v) u.voice = v;
+    u.rate = (opts && opts.rate) || 0.85;
+    u.pitch = (opts && opts.pitch) || 1.15;
+    window.speechSynthesis.speak(u);
+  }
+
+  function setMascot(text, say){
+    document.getElementById('mascotText').textContent = text;
+    if(say) speak(text, {rate:0.9});
+  }
+
+  function pickRandom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+  const starCountEl = document.getElementById('starCount');
+
+  /* ---------- tabs ---------- */
+  const tabColor = document.getElementById('tabColor');
+  const tabShape = document.getElementById('tabShape');
+  const tabQuiz = document.getElementById('tabQuiz');
+  const colorSection = document.getElementById('colorSection');
+  const shapeSection = document.getElementById('shapeSection');
+  const quizSection = document.getElementById('quizSection');
+
+  const tabs = [
+    { btn: tabColor, section: colorSection },
+    { btn: tabShape, section: shapeSection },
+    { btn: tabQuiz, section: quizSection }
+  ];
+
+  function activateTab(target){
+    tabs.forEach(t => {
+      const isActive = t.btn === target.btn;
+      t.btn.classList.toggle('active', isActive);
+      t.section.classList.toggle('active', isActive);
+    });
+  }
+
+  tabColor.addEventListener('click', () => {
+    activateTab(tabs[0]);
+    setMascot('點一點顏色，聽聽看怎麼唸！', true);
+  });
+  tabShape.addEventListener('click', () => {
+    activateTab(tabs[1]);
+    setMascot('點一點形狀，聽聽看怎麼唸！', true);
+  });
+  tabQuiz.addEventListener('click', () => {
+    activateTab(tabs[2]);
+    setMascot('仔細聽，找出正確的答案吧！', true);
+    if(!quizSection.dataset.started){ newQuizQuestion(); quizSection.dataset.started = '1'; }
+  });
+
+  /* ---------- shape icon builder ---------- */
+  function shapeIconHtml(id, sizeClass){
+    return `<div class="shape-icon ${id} ${sizeClass || ''}"></div>`;
+  }
+
+  /* ---------- 認識顏色 ---------- */
+  const colorGrid = document.getElementById('colorGrid');
+  const colorDetail = document.getElementById('colorDetail');
+
+  COLORS.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'item-card';
+    btn.innerHTML = `<div class="color-swatch" style="background:${c.hex}"></div><div class="item-label">${c.name}</div>`;
+    btn.addEventListener('click', () => showColor(c, btn));
+    colorGrid.appendChild(btn);
+  });
+
+  function showColor(c, btn){
+    document.querySelectorAll('#colorGrid .item-card').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    colorDetail.innerHTML = `
+      <div class="color-swatch large" style="background:${c.hex}"></div>
+      <div class="detail-name">${c.name}</div>
+      <div class="detail-word">像「${c.word}」${c.emoji} 一樣的顏色</div>
+      <button class="sound-btn" id="replayColorBtn">🔊 再唸一次</button>
+    `;
+    document.getElementById('replayColorBtn').addEventListener('click', () => speak(c.name));
+    speak(`${c.name}，像${c.word}一樣的顏色`);
+    setMascot(`這是 ${c.name}，像「${c.word}」一樣！`, false);
+  }
+
+  /* ---------- 認識形狀 ---------- */
+  const shapeGrid = document.getElementById('shapeGrid');
+  const shapeDetail = document.getElementById('shapeDetail');
+
+  SHAPES.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'item-card';
+    btn.innerHTML = `${shapeIconHtml(s.id)}<div class="item-label">${s.name}</div>`;
+    btn.addEventListener('click', () => showShape(s, btn));
+    shapeGrid.appendChild(btn);
+  });
+
+  function showShape(s, btn){
+    document.querySelectorAll('#shapeGrid .item-card').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    shapeDetail.innerHTML = `
+      ${shapeIconHtml(s.id, 'large')}
+      <div class="detail-name">${s.name}</div>
+      <div class="detail-word">${s.word}</div>
+      <button class="sound-btn" id="replayShapeBtn">🔊 再唸一次</button>
+    `;
+    document.getElementById('replayShapeBtn').addEventListener('click', () => speak(s.name));
+    speak(`${s.name}，${s.word}`);
+    setMascot(`這是 ${s.name}！`, false);
+  }
+
+  /* ---------- 聽一聽選一選（顏色 + 形狀混合） ---------- */
+  const quizSub = document.getElementById('quizSub');
+  const quizChoiceRow = document.getElementById('quizChoiceRow');
+  const quizFeedback = document.getElementById('quizFeedback');
+  const quizNextBtn = document.getElementById('quizNextBtn');
+  const replayQuizBtn = document.getElementById('replayQuizBtn');
+
+  let quizType = 'color';
+  let quizAnswer = null;
+  let quizAnswered = false;
+
+  function newQuizQuestion(){
+    quizAnswered = false;
+    quizFeedback.textContent = '';
+    quizFeedback.className = 'feedback';
+    quizNextBtn.style.display = 'none';
+
+    quizType = Math.random() < 0.5 ? 'color' : 'shape';
+    quizSub.textContent = quizType === 'color'
+      ? '兔兔老師說出一個顏色，你來找找看'
+      : '兔兔老師說出一個形狀，你來找找看';
+
+    if(quizType === 'color'){
+      quizAnswer = pickRandom(COLORS);
+      const set = new Set([quizAnswer.name]);
+      const chosen = [quizAnswer];
+      while(set.size < 3){
+        const cand = pickRandom(COLORS);
+        if(!set.has(cand.name)){ set.add(cand.name); chosen.push(cand); }
+      }
+      const arr = chosen.sort(() => Math.random() - 0.5);
+      quizChoiceRow.innerHTML = '';
+      arr.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.dataset.key = c.name;
+        btn.innerHTML = `<div class="color-swatch large" style="background:${c.hex}"></div>`;
+        btn.addEventListener('click', () => checkQuizAnswer(c.name, btn));
+        quizChoiceRow.appendChild(btn);
+      });
+    } else {
+      quizAnswer = pickRandom(SHAPES);
+      const set = new Set([quizAnswer.id]);
+      const chosen = [quizAnswer];
+      while(set.size < 3){
+        const cand = pickRandom(SHAPES);
+        if(!set.has(cand.id)){ set.add(cand.id); chosen.push(cand); }
+      }
+      const arr = chosen.sort(() => Math.random() - 0.5);
+      quizChoiceRow.innerHTML = '';
+      arr.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.dataset.key = s.id;
+        btn.innerHTML = shapeIconHtml(s.id, 'large');
+        btn.addEventListener('click', () => checkQuizAnswer(s.id, btn));
+        quizChoiceRow.appendChild(btn);
+      });
+    }
+
+    askQuizQuestion();
+  }
+
+  function askQuizQuestion(){
+    speak(`找找看，${quizAnswer.name}在哪裡？`, {rate:0.85});
+  }
+
+  function checkQuizAnswer(key, btn){
+    if(quizAnswered) return;
+    quizAnswered = true;
+    const answerKey = quizType === 'color' ? quizAnswer.name : quizAnswer.id;
+    const buttons = quizChoiceRow.querySelectorAll('.choice-btn');
+
+    if(key === answerKey){
+      btn.classList.add('correct');
+      quizFeedback.textContent = '答對了！你好棒！🎉';
+      quizFeedback.className = 'feedback good';
+      starCount++;
+      starCountEl.textContent = starCount;
+      speak(`答對了！是 ${quizAnswer.name}！你好棒！`);
+      setMascot('答對了！你好棒！', false);
+    } else {
+      btn.classList.add('wrong');
+      buttons.forEach(b => { if(b.dataset.key === answerKey) b.classList.add('correct'); });
+      quizFeedback.textContent = `再試試看！正確答案是 ${quizAnswer.name} 喔！`;
+      quizFeedback.className = 'feedback bad';
+      speak(`再試試看，正確答案是 ${quizAnswer.name}`);
+      setMascot('沒關係，再試一次！', false);
+    }
+    buttons.forEach(b => b.disabled = true);
+    quizNextBtn.style.display = 'inline-block';
+  }
+
+  replayQuizBtn.addEventListener('click', askQuizQuestion);
+  quizNextBtn.addEventListener('click', newQuizQuestion);
+
+  /* initial greeting (speech needs user gesture on some browsers) */
+  document.body.addEventListener('click', function initSpeech(){
+    speak('哈囉！我是兔兔老師，我們一起來認識顏色和形狀吧！');
+    document.body.removeEventListener('click', initSpeech);
+  }, { once:true });
+</script>
+
+</body>
+</html>
