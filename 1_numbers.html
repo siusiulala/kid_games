@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>阿拉伯數字樂園</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=ZCOOL+KuaiLe&display=swap');
+
+  :root{
+    --sky-top:#7FD1FF;
+    --sky-bottom:#BDEBFF;
+    --sun:#FFD93D;
+    --coral:#FF6F59;
+    --grass:#6FCF6F;
+    --purple:#8C6BC8;
+    --white:#FFFFFF;
+    --ink:#2B2250;
+    --card-shadow: 0 8px 0 rgba(43,34,80,0.18);
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family:'ZCOOL KuaiLe', sans-serif;
+    color:var(--ink);
+    overflow-x:hidden;
+    user-select:none;
+  }
+
+  body{
+    background:linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%, #FFF6DD 100%);
+    min-height:100vh;
+    position:relative;
+  }
+
+  /* decorative clouds & sun */
+  .deco{ position:fixed; pointer-events:none; z-index:0; opacity:0.9; }
+  .sun{
+    top:18px; right:22px; width:70px; height:70px; border-radius:50%;
+    background:var(--sun); box-shadow:0 0 0 10px rgba(255,217,61,0.35);
+  }
+  .cloud{ background:#fff; border-radius:50px; opacity:0.85; }
+  .cloud1{ top:60px; left:-20px; width:140px; height:44px; }
+  .cloud1::before, .cloud1::after{ content:''; position:absolute; background:#fff; border-radius:50%; }
+  .cloud1::before{ width:60px; height:60px; top:-28px; left:14px; }
+  .cloud1::after{ width:44px; height:44px; top:-20px; left:70px; }
+  .cloud2{ top:140px; right:-30px; width:110px; height:36px; }
+  .cloud2::before{ content:''; position:absolute; width:46px; height:46px; background:#fff; border-radius:50%; top:-20px; left:20px; }
+
+  .wrap{ position:relative; z-index:1; max-width:760px; margin:0 auto; padding:18px 16px 40px; }
+
+  /* header / mascot */
+  header{ display:flex; align-items:flex-end; gap:14px; margin-bottom:14px; }
+  .mascot{
+    font-size:58px; line-height:1; flex-shrink:0;
+    animation: bob 2.6s ease-in-out infinite;
+  }
+  @keyframes bob{ 0%,100%{ transform:translateY(0) rotate(-4deg);} 50%{ transform:translateY(-8px) rotate(4deg);} }
+  .speech-bubble{
+    background:var(--white); border-radius:20px; padding:10px 16px;
+    box-shadow:var(--card-shadow); font-size:16px; position:relative; flex:1;
+  }
+  .speech-bubble::after{
+    content:''; position:absolute; left:-10px; bottom:14px;
+    border-width:8px 12px 8px 0; border-style:solid;
+    border-color:transparent var(--white) transparent transparent;
+  }
+
+  h1{
+    font-family:'ZCOOL KuaiLe', sans-serif;
+    font-size:30px; text-align:center; margin:6px 0 18px;
+    color:var(--ink);
+    text-shadow: 2px 2px 0 var(--sun);
+    letter-spacing:1px;
+  }
+
+  /* mode toggle */
+  .toggle{
+    display:flex; gap:8px; background:rgba(255,255,255,0.6);
+    padding:6px; border-radius:999px; margin:0 auto 22px; width:fit-content;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.06);
+  }
+  .toggle button{
+    font-family:'ZCOOL KuaiLe', sans-serif; font-size:17px;
+    border:none; padding:10px 20px; border-radius:999px; cursor:pointer;
+    background:transparent; color:var(--ink); transition:all .2s ease;
+  }
+  .toggle button.active{
+    background:var(--coral); color:#fff; box-shadow:0 4px 0 rgba(0,0,0,0.12);
+    transform:translateY(-1px);
+  }
+
+  section{ display:none; }
+  section.active{ display:block; animation:fadeIn .3s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Learn mode ---------- */
+  .num-grid{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;
+    margin-bottom:22px;
+  }
+  @media (max-width:420px){ .num-grid{ grid-template-columns:repeat(3, 1fr);} }
+
+  .num-card{
+    font-family:'Baloo 2', sans-serif; font-weight:800;
+    font-size:38px; text-align:center; padding:16px 0 10px;
+    background:var(--white); border:none; border-radius:18px;
+    box-shadow:var(--card-shadow); cursor:pointer; color:var(--purple);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .num-card:active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(43,34,80,0.18); }
+  .num-card.selected{ background:var(--sun); color:var(--ink); }
+
+  .detail-panel{
+    background:var(--white); border-radius:22px; padding:20px;
+    box-shadow:var(--card-shadow); text-align:center; min-height:150px;
+  }
+  .detail-panel .big-num{
+    font-family:'Baloo 2', sans-serif; font-weight:800; font-size:64px;
+    color:var(--coral); line-height:1;
+  }
+  .detail-panel .cn-word{ font-size:26px; margin:4px 0 14px; color:var(--ink); }
+  .icon-row{ font-size:30px; line-height:1.4; word-spacing:4px; min-height:40px; }
+  .hint{ color:#9a90b8; font-size:15px; margin-top:8px; }
+
+  /* ---------- Count mode ---------- */
+  .quiz-card{
+    background:var(--white); border-radius:22px; padding:22px 18px;
+    box-shadow:var(--card-shadow); text-align:center;
+  }
+  .quiz-question{ font-size:20px; margin-bottom:10px; }
+  .object-stage{
+    font-size:42px; line-height:1.5; min-height:110px;
+    display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:6px;
+    margin-bottom:18px;
+  }
+  .object-stage span{ display:inline-block; animation:pop .35s ease; }
+  @keyframes pop{ from{ transform:scale(0);} to{ transform:scale(1);} }
+
+  .choice-row{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; }
+  .choice-btn{
+    font-family:'Baloo 2', sans-serif; font-weight:700; font-size:30px;
+    width:74px; height:74px; border-radius:16px; border:none;
+    background:var(--sun); color:var(--ink); box-shadow:var(--card-shadow);
+    cursor:pointer; transition:transform .12s ease;
+  }
+  .choice-btn:active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(43,34,80,0.18); }
+  .choice-btn.correct{ background:var(--grass); color:#fff; }
+  .choice-btn.wrong{ background:#f28b82; color:#fff; }
+
+  .feedback{ min-height:30px; font-size:18px; margin-top:14px; }
+  .feedback.good{ color:#2e7d32; }
+  .feedback.bad{ color:#c1440e; }
+
+  .next-btn{
+    margin-top:14px; font-family:'ZCOOL KuaiLe', sans-serif; font-size:17px;
+    background:var(--purple); color:#fff; border:none; padding:10px 22px;
+    border-radius:999px; cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,0.15);
+    display:none;
+  }
+
+  /* stars footer */
+  .stars-bar{
+    position:sticky; bottom:0; margin-top:24px; text-align:center;
+    background:rgba(255,255,255,0.75); backdrop-filter:blur(4px);
+    border-radius:16px; padding:10px; font-size:18px;
+  }
+
+  .sound-btn{
+    background:var(--purple); color:#fff; border:none; border-radius:999px;
+    padding:8px 16px; font-family:'ZCOOL KuaiLe', sans-serif; font-size:14px;
+    cursor:pointer; margin-top:8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="deco sun"></div>
+<div class="deco cloud cloud1"></div>
+<div class="deco cloud cloud2"></div>
+
+<div class="wrap">
+  <header>
+    <div class="mascot">🐻</div>
+    <div class="speech-bubble" id="mascotText">哈囉！我是熊熊老師，我們一起來認識數字吧！</div>
+  </header>
+
+  <h1>阿拉伯數字樂園</h1>
+
+  <div class="toggle">
+    <button id="tabLearn" class="active">認識數字</button>
+    <button id="tabCount">數一數</button>
+  </div>
+
+  <!-- 認識數字 -->
+  <section id="learnSection" class="active">
+    <div class="num-grid" id="numGrid"></div>
+    <div class="detail-panel" id="detailPanel">
+      <div class="hint">點一點上面的數字卡片，聽聽看怎麼唸！</div>
+    </div>
+  </section>
+
+  <!-- 數一數 -->
+  <section id="countSection">
+    <div class="quiz-card">
+      <div class="quiz-question">數一數，這裡有幾個呢？</div>
+      <div class="object-stage" id="objectStage"></div>
+      <div class="choice-row" id="choiceRow"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="nextBtn">下一題 →</button>
+    </div>
+  </section>
+
+  <div class="stars-bar">⭐ 答對次數：<span id="starCount">0</span> ⭐</div>
+</div>
+
+<script>
+  const NUM_WORDS = ['零','一','二','三','四','五','六','七','八','九','十'];
+  const OBJECT_POOL = ['🍎','🐶','🐱','⭐','🎈','🍓','🦋','🌸','🍌','🐻'];
+
+  let starCount = 0;
+  let voices = [];
+
+  function loadVoices(){ voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; }
+  if('speechSynthesis' in window){
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function speak(text, opts){
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-TW';
+    let v = voices.find(v => v.lang === 'zh-TW') || voices.find(v => v.lang && v.lang.startsWith('zh'));
+    if(v) u.voice = v;
+    u.rate = (opts && opts.rate) || 0.85;
+    u.pitch = (opts && opts.pitch) || 1.15;
+    window.speechSynthesis.speak(u);
+  }
+
+  function setMascot(text, say){
+    document.getElementById('mascotText').textContent = text;
+    if(say) speak(text, {rate:0.9});
+  }
+
+  /* ---------- tabs ---------- */
+  const tabLearn = document.getElementById('tabLearn');
+  const tabCount = document.getElementById('tabCount');
+  const learnSection = document.getElementById('learnSection');
+  const countSection = document.getElementById('countSection');
+
+  tabLearn.addEventListener('click', () => {
+    tabLearn.classList.add('active'); tabCount.classList.remove('active');
+    learnSection.classList.add('active'); countSection.classList.remove('active');
+    setMascot('點一點數字卡片，聽聽看怎麼唸！', true);
+  });
+  tabCount.addEventListener('click', () => {
+    tabCount.classList.add('active'); tabLearn.classList.remove('active');
+    countSection.classList.add('active'); learnSection.classList.remove('active');
+    setMascot('數一數，選出正確的數字吧！', true);
+    if(!countSection.dataset.started){ newQuestion(); countSection.dataset.started = '1'; }
+  });
+
+  /* ---------- Learn mode ---------- */
+  const numGrid = document.getElementById('numGrid');
+  const detailPanel = document.getElementById('detailPanel');
+
+  for(let n = 0; n <= 10; n++){
+    const btn = document.createElement('button');
+    btn.className = 'num-card';
+    btn.textContent = n;
+    btn.addEventListener('click', () => showNumber(n, btn));
+    numGrid.appendChild(btn);
+  }
+
+  function showNumber(n, btn){
+    document.querySelectorAll('.num-card').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    const word = NUM_WORDS[n];
+    let iconsHtml = '';
+    if(n === 0){
+      iconsHtml = '<div class="hint">一個都沒有喔，空空的～</div>';
+    } else {
+      const icon = OBJECT_POOL[n % OBJECT_POOL.length];
+      iconsHtml = '<div class="icon-row">' + Array(n).fill(icon).join(' ') + '</div>';
+    }
+
+    detailPanel.innerHTML = `
+      <div class="big-num">${n}</div>
+      <div class="cn-word">國字：${word}</div>
+      ${iconsHtml}
+      <button class="sound-btn" id="replayBtn">🔊 再唸一次</button>
+    `;
+    document.getElementById('replayBtn').addEventListener('click', () => speak(`${word}`));
+    speak(`數字 ${word}`);
+    setMascot(`這是 ${n}，唸作「${word}」！`, false);
+  }
+
+  /* ---------- Count mode ---------- */
+  const objectStage = document.getElementById('objectStage');
+  const choiceRow = document.getElementById('choiceRow');
+  const feedback = document.getElementById('feedback');
+  const nextBtn = document.getElementById('nextBtn');
+  const starCountEl = document.getElementById('starCount');
+
+  let currentAnswer = 0;
+  let answered = false;
+
+  function newQuestion(){
+    answered = false;
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+    nextBtn.style.display = 'none';
+
+    currentAnswer = 1 + Math.floor(Math.random() * 10); // 1-10
+    const icon = OBJECT_POOL[Math.floor(Math.random() * OBJECT_POOL.length)];
+
+    objectStage.innerHTML = '';
+    for(let i = 0; i < currentAnswer; i++){
+      const span = document.createElement('span');
+      span.textContent = icon;
+      span.style.animationDelay = (i * 0.05) + 's';
+      objectStage.appendChild(span);
+    }
+
+    // build choices: correct + 2 distractors, all within 0-10
+    const choices = new Set([currentAnswer]);
+    while(choices.size < 3){
+      const d = Math.max(0, Math.min(10, currentAnswer + (Math.floor(Math.random()*5) - 2)));
+      choices.add(d);
+    }
+    const arr = Array.from(choices).sort(() => Math.random() - 0.5);
+
+    choiceRow.innerHTML = '';
+    arr.forEach(n => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = n;
+      btn.addEventListener('click', () => checkAnswer(n, btn));
+      choiceRow.appendChild(btn);
+    });
+
+    speak('數一數，這裡有幾個呢？', {rate:0.9});
+  }
+
+  function checkAnswer(n, btn){
+    if(answered) return;
+    answered = true;
+    const buttons = choiceRow.querySelectorAll('.choice-btn');
+
+    if(n === currentAnswer){
+      btn.classList.add('correct');
+      feedback.textContent = '答對了！你好棒！🎉';
+      feedback.className = 'feedback good';
+      starCount++;
+      starCountEl.textContent = starCount;
+      speak(`答對了！是 ${NUM_WORDS[currentAnswer]}！你好棒！`);
+      setMascot('答對了！你好棒！', false);
+    } else {
+      btn.classList.add('wrong');
+      buttons.forEach(b => { if(parseInt(b.textContent) === currentAnswer) b.classList.add('correct'); });
+      feedback.textContent = `再試試看！正確答案是 ${currentAnswer} 喔！`;
+      feedback.className = 'feedback bad';
+      speak(`再試試看，正確答案是 ${NUM_WORDS[currentAnswer]}`);
+      setMascot('沒關係，再試一次！', false);
+    }
+    buttons.forEach(b => b.disabled = true);
+    nextBtn.style.display = 'inline-block';
+  }
+
+  nextBtn.addEventListener('click', newQuestion);
+
+  /* initial greeting (speech needs user gesture on some browsers, so first tap triggers it) */
+  document.body.addEventListener('click', function initSpeech(){
+    speak('哈囉！我是熊熊老師，我們一起來認識數字吧！');
+    document.body.removeEventListener('click', initSpeech);
+  }, { once:true });
+</script>
+
+</body>
+</html>
