@@ -507,11 +507,7 @@
 
   picNextBtn.addEventListener('click', newPicQuestion);
 
-  /* initial greeting (speech needs user gesture on some browsers) */
-  document.body.addEventListener('click', function initSpeech(){
-    speak('哈囉！我是狐狐老師，我們一起來認識注音符號吧！');
-    document.body.removeEventListener('click', initSpeech);
-  }, { once:true });
+ 
 </script>
 
 </body>

@@ -264,7 +264,6 @@
     { id:'triangle', name:'三角形', word:'三個角，像飯糰、像山' },
     { id:'rectangle', name:'長方形', word:'像門、像一本書' },
     { id:'star', name:'星星', word:'像天空中閃亮的星星' },
-    { id:'heart', name:'愛心', word:'代表愛的形狀' },
     { id:'oval', name:'橢圓形', word:'像雞蛋、像葉子' },
     { id:'diamond', name:'菱形', word:'像風箏的形狀' },
   ];
@@ -490,11 +489,7 @@
   replayQuizBtn.addEventListener('click', askQuizQuestion);
   quizNextBtn.addEventListener('click', newQuizQuestion);
 
-  /* initial greeting (speech needs user gesture on some browsers) */
-  document.body.addEventListener('click', function initSpeech(){
-    speak('哈囉！我是兔兔老師，我們一起來認識顏色和形狀吧！');
-    document.body.removeEventListener('click', initSpeech);
-  }, { once:true });
+ 
 </script>
 
 </body>
